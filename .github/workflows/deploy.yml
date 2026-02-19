@@ -1,32 +1,8 @@
-name: Deploy to EC2
-
-on:
-  push:
-    branches:
-      - main   # change to master if your default branch is master
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /var/www/html
-
-            # First-time setup: clone if .git doesn't exist
-            if [ ! -d ".git" ]; then
-              echo "Cloning repository..."
-              git clone https://github.com/bhargesh007/freamus.git .
-            else
-              echo "Pulling latest changes..."
-              git pull origin main
-            fi
+- name: Copy files to EC2
+  uses: appleboy/scp-action@master
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USER }}
+    key: ${{ secrets.EC2_SSH_KEY }}
+    source: "."
+    target: "/var/www/html"
