@@ -22,11 +22,24 @@ jobs:
           script: |
             cd /var/www/html
 
-            # First-time setup: clone if .git doesn't exist
             if [ ! -d ".git" ]; then
-              echo "Cloning repository..."
               git clone https://github.com/bhargesh007/freamus.git .
             else
-              echo "Pulling latest changes..."
-              git pull origin main
+              git fetch origin
+              git reset --hard origin/main
             fi
+
+            # Stop old container
+            docker stop freamus-container || true
+            docker rm freamus-container || true
+
+            # Build new image
+            docker build -t freamus-image .
+
+            # Run container
+            docker run -d \
+              -p 80:80 \
+              --name freamus-container \
+              --restart always \
+              freamus-image
+
